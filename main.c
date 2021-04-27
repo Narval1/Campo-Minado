@@ -4,6 +4,7 @@
 #include <string.h>
 
 // prototipos de funcoes
+void playerInfo();
 void savePlayerInfo(char *points);
 
 // struct para cada campo
@@ -18,13 +19,31 @@ typedef struct {
 // criacao do tabuleiro (matriz[length][length])
 field board[length][length];
 
-char playerName[51];
+char *playerName = NULL;
 
 int main(void) {
+  playerInfo();
 
   savePlayerInfo("points");   // ultima funcao a ser chamada
 
   return 0;
+}
+
+void playerInfo() {
+  playerName = (char *) malloc(51 * sizeof(char));
+  if (playerName == NULL) {
+    printf("Erro ao alocar memória.");
+    exit(2);
+  }
+
+  printf("Digite o nome do jogador:\nEx.: nome_sobrenome\n\n");
+  scanf("%s", playerName);
+
+  playerName = (char *) realloc(playerName, strlen(playerName) * sizeof(char));
+  if (playerName == NULL) {
+    printf("Erro ao alocar memória.");
+    exit(2);
+  }
 }
 
 void savePlayerInfo(char *points) {
@@ -53,4 +72,6 @@ void savePlayerInfo(char *points) {
   fputc('\n', database);
 
   fclose(database);
+
+  free(playerName);
 }
