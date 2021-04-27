@@ -21,10 +21,8 @@ field board[length][length];
 char playerName[51];
 
 int main(void) {
-  printf("Insira seu nome sem espacos: (ex.: nome_sobrenome)\n");
-  scanf("%s", playerName);
 
-  //savePlayerInfo("points");
+  savePlayerInfo("points");   // ultima funcao a ser chamada
 
   return 0;
 }
