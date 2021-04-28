@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h> // adicionei só pra ficar bonitinho
 
 // prototipos de funcoes
 void playerInfo();
@@ -74,4 +75,20 @@ void savePlayerInfo(char *points) {
   fclose(database);
 
   free(playerName);
+}
+
+int ValidCoord(int line, int column){ // verificação da coordenada no campo.
+  if(line >=0 && line < length && column >=0 && column < length )
+    return 1;
+    
+  return 0;
+}
+
+int ValidSymbol(int Symbol){ // Validação da função/símbolo solicitada pelo usuário. 
+  Symbol=toupper(Symbol); 
+
+  if(Symbol=='O' || Symbol == 'F') // Eu defini o O como open e F como flag no chute, se quiserem mudar tá safe
+     return 1;
+    
+  return 0;
 }
