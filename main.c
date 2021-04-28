@@ -75,3 +75,29 @@ void savePlayerInfo(char *points) {
 
   free(playerName);
 }
+
+void abrirCelula(int linha, int coluna) {
+
+  if (validacaoDeCoordenada(linha, coluna) == 1 && jogo[linha][coluna].estaAberta == 0) {
+    jogo[linha][coluna].estaAberta = 1;
+    if (jogo[linha][coluna].vizinhos == 0) {
+      abrir(linha - 1, coluna);
+      abrir(linha + 1, coluna);
+      abrir(linha, coluna + 1);
+      abrir(linha - 1, coluna - 1);
+    }
+  }
+}
+
+void jogar() {
+  int linha, coluna;
+
+  printf("\nDigite a linha e a coluna: ");
+  scanf("%d%d",&linha, &coluna);
+
+  if (validacaoDeCoordenada(linha, coluna) == 0) {
+    printf("coordenadas invalidas, digite novamente:\n");
+    jogar();
+  }
+}
+
