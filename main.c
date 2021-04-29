@@ -82,7 +82,11 @@ void abrirCelula(int linha, int coluna) {
     jogo[linha][coluna].estaAberta = 1;
     if (jogo[linha][coluna].vizinhos == 0) {
       abrir(linha - 1, coluna);
+      abrir(linha -1, coluna -1);
+      abrir(linha -1, coluna + 1);
       abrir(linha + 1, coluna);
+      abrir(linha + 1, coluna -1);
+      abrir(linha + 1, coluna + 1);
       abrir(linha, coluna + 1);
       abrir(linha - 1, coluna - 1);
     }
@@ -99,5 +103,7 @@ void jogar() {
     printf("coordenadas invalidas, digite novamente:\n");
     jogar();
   }
+
+  abrirCelula(linha, coluna);
 }
 
