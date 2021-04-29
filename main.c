@@ -145,33 +145,15 @@ void action(linha, coluna) {
 
 // Checagem para por bombas longe de onde foi dado o primeiro clique
 int preBombs(linha, coluna, l, c) {
-  if (board[linha][coluna] == board[l][c] {
-    return 1;
-  }
-  else if (board[linha-1][coluna] == board[l][c] {
-    return 1;
-  }
-  else if (board[linha+1][coluna] == board[l][c] {
-    return 1;
-  }
-  else if (board[linha][coluna-1] == board[l][c] {
-    return 1;
-  }
-  else if (board[linha][coluna+1] == board[l][c] {
-    return 1;
-  }
-  else if (board[linha-1][coluna+1] == board[l][c] {
-    return 1;
-  }
-  else if (board[linha-1][coluna-1] == board[l][c] {
-    return 1;
-  }
-  else if (board[linha+1][coluna-1] == board[l][c] {
-    return 1;
-  }
-  else if (board[linha+1][coluna+1] == board[l][c] {
-    return 1;
-  }
+  if (board[linha][coluna] == board[l][c])  return 1; 
+  if (board[linha-1][coluna] == board[l][c]) return 1;
+  if (board[linha+1][coluna] == board[l][c]) return 1;
+  if (board[linha][coluna-1] == board[l][c])  return 1;
+  if (board[linha][coluna+1] == board[l][c])  return 1;
+  if (board[linha-1][coluna+1] == board[l][c]) return 1;
+  if (board[linha-1][coluna-1] == board[l][c]) return 1;
+  if (board[linha+1][coluna-1] == board[l][c]) return 1;
+  if (board[linha+1][coluna+1] == board[l][c]) return 1;
   return 0;
 }
 
