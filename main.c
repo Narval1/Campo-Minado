@@ -2,11 +2,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h> // adicionei só pra ficar bonitinho
+#include <ctype.h>
+#include <time.h>
 
 // prototipos de funcoes
-void playerInfo();
+void playerInfo(void);
 void savePlayerInfo(char *points);
+int validCoord(int line, int column);
+void openCoord(int line, int column);
+void play(void);
+void action(int line, int column);
+void putBombs(int line, int column);
+int preBombs(int line, int column);
+int checkWin(void);
+int checkLost(void);
 
 // struct para cada campo
 typedef struct {
@@ -14,11 +23,10 @@ typedef struct {
   int open;           // recebe 0 (false) ou 1 (true)
   int flag;           // recebe 0 (false) ou 1 (true)
   int adjacentBombs;  // recebe um numero entre 0 e 8
-  int firstplay = 0;  // contador pra colocar as bombas só depois da primeira jogada
 } field;
 
-#define length 10
 // criacao do tabuleiro (matriz[length][length])
+#define length 10
 field board[length][length];
 
 char *playerName = NULL;
@@ -31,10 +39,11 @@ int main(void) {
   return 0;
 }
 
-void playerInfo() {
+// recebe o nome do jogador
+void playerInfo(void) {
   playerName = (char *) malloc(51 * sizeof(char));
   if (playerName == NULL) {
-    printf("Erro ao alocar memória.");
+    printf("Erro ao alocar memoria.");
     exit(2);
   }
 
@@ -43,11 +52,12 @@ void playerInfo() {
 
   playerName = (char *) realloc(playerName, strlen(playerName) * sizeof(char));
   if (playerName == NULL) {
-    printf("Erro ao alocar memória.");
+    printf("Erro ao alocar memoria.");
     exit(2);
   }
 }
 
+// salva as informacoes no arquivo database.txt
 void savePlayerInfo(char *points) {
   FILE *database = fopen("database.txt", "a");
   char text1[10] = "Jogador: ", text2[11] = "; Pontos: ";
@@ -78,133 +88,133 @@ void savePlayerInfo(char *points) {
   free(playerName);
 }
 
- // verificação da coordenada no campo.
-int ValidCoord(int line, int column){
-  if(line >=0 && line < length && column >=0 && column < length )
+// verificacao da coordenada no campo.
+int validCoord(int line, int column) {
+  if(line >= 0 && line < length && column >= 0 && column < length )
     return 1;
-    
+
   return 0;
 }
 
 // abre a coordenada e caso seja zero, abre as adjacentes 
-void openCoord(int linha, int coluna) {
-  
-  if (ValidCoord(linha, coluna) == 1 && board[linha][coluna].open == 0 && board[linha][coluna].flag == 0 ) {
-    board[linha][coluna].open = 1;
-    if (board[linha][coluna].vizinhos == 0) {
-      openCoord(linha - 1, coluna);
-      openCoord(linha -1, coluna -1);
-      openCoord(linha -1, coluna + 1);
-      openCoord(linha + 1, coluna);
-      openCoord(linha + 1, coluna -1);
-      openCoord(linha + 1, coluna + 1);
-      openCoord(linha, coluna + 1);
-      openCoord(linha - 1, coluna - 1);
+void openCoord(int line, int column) {
+  if (validCoord(line, column) && !board[line][column].open && !board[line][column].flag) {
+    board[line][column].open = 1;
+
+    if (board[line][column].vizinhos == 0) {
+      openCoord(line - 1, column);
+      openCoord(line - 1, column - 1);
+      openCoord(line - 1, column + 1);
+      openCoord(line + 1, column);
+      openCoord(line + 1, column - 1);
+      openCoord(line + 1, column + 1);
+      openCoord(line, column + 1);
+      openCoord(line - 1, column - 1);
     }
   }
 }
 
-// lê a jogada
-void jogar() {
-  int linha, coluna;
+// recebe a jogada
+void play(void) {
+  int line, column;
   char symbol;
 
   printf("\nDigite a linha e a coluna: ");
-  scanf("%d%d",&linha, &coluna);
+  scanf("%d%d", &line, &column);
 
-  if (ValidCoord(linha, coluna) == 0) {
-    printf("coordenadas invalidas, digite novamente:\n");
-    jogar();
+  if (!validCoord(line, column)) {
+    printf("coordenadas invalidas!\n");
+    play();
+    return;
   }
-  else {
-    action(linha, coluna);
-  }
+
+  action(line, column);
 }
 
-// realoquei a checagem de simbolo do Rafa aqui
-// Lê se o player quer abrir ou marcar uma bandeira e executa
-void action(linha, coluna) {
-  printf("\nO que dejesa fazer?('O' para open e 'F' para flag):")
-    scanf("%c",&symbol);
-    symbol=toupper(symbol);
+// Checa se o player quer abrir ou marcar com uma bandeira
+void action(int line, int column) {
+  int firstPlay = 1;
 
-    if (symbol == 'F') {
-      board[linha][coluna].flag == 1
-    } 
-    else if (symbol == 'O') {
-      putBombs(linha, coluna);
-      openCoord(linha, coluna);
-      firstplay = 1;
+  printf("\nO que dejesa fazer? ('O' para abrir e 'F' para colocar bandeira):")
+  scanf(" %c",&symbol);
+  symbol = toupper(symbol);
+
+  if (symbol == 'F') {
+    board[line][column].flag == 1
+    return;
+  }
+
+  if (symbol == 'O') {
+    if (firstPlay) {
+      putBombs(line, column);
+      firstPlay = 0;
     }
-    else {
-      printf("simbolo inválido, digite novamente:\n");
-    action(linha, coluna);
-    }
+
+    openCoord(line, column);
+    return;
+  }
+
+  printf("Jogada invalida!\n");
+  action(line, column);
 }
 
+// Coloca bombas em locais aleatorios, porem longe do primeiro clique
+void putBombs(int line, int column) {
+  int numberOfBombs = (length * length) * 0.25;
+
+  for (int bombs = 0; bombs <= numberOfBombs; bombs++){
+    if (preBombs(line, column))
+      i--;
+}
 
 // Checagem para por bombas longe de onde foi dado o primeiro clique
-int preBombs(linha, coluna, l, c) {
-  if (board[linha][coluna] == board[l][c])  return 1; 
-  if (board[linha-1][coluna] == board[l][c]) return 1;
-  if (board[linha+1][coluna] == board[l][c]) return 1;
-  if (board[linha][coluna-1] == board[l][c])  return 1;
-  if (board[linha][coluna+1] == board[l][c])  return 1;
-  if (board[linha-1][coluna+1] == board[l][c]) return 1;
-  if (board[linha-1][coluna-1] == board[l][c]) return 1;
-  if (board[linha+1][coluna-1] == board[l][c]) return 1;
-  if (board[linha+1][coluna+1] == board[l][c]) return 1;
+int preBombs(int line, int column) {
+  srand(time(NULL));
+  int l = rand() % length, c = rand() % length;
+
+  if (l == line && c == column)
+    return 1;
+  if (l == line - 1 && c == column)
+    return 1;
+  if (l == line + 1 && c == column)
+    return 1;
+  if (l == line && c == column - 1)
+    return 1;
+  if (l == line && c == column + 1)
+    return 1;
+  if (l == line - 1 && c == column + 1)
+    return 1;
+  if (l == line - 1 && c == column - 1)
+    return 1;
+  if (l == line + 1 && c == column - 1)
+    return 1;
+  if (l == line + 1 && c == column + 1)
+    return 1;
+
+  if (board[l][c].bomb)
+    return 1;
+
+  board[l][c].bomb = 1;
   return 0;
 }
 
-// coloca bombas em locais aleatorios, porém longe do primeiro clique
-void putBombs(linha, coluna) {
-  int n = 21;
-  int i;
-  srand(time(NULL));
-  if (firstplay == 0) {
-    for (i = 1; i <= n; i++){
-      l = rand() % length;
-      c = rand() % length;
-      if (preBombs(linha, coluna, l, c) == 0) {
-        if (board[l][c].bomb == 0) {
-          board[l][c].bomb = 1;
-        }
-        else {
-          i--;
-        }
-      }
-      else {
-        i--;
-      }
-    }
-  }
+//checa vitoria
+int checkWin(void) {
+  for (int l = 0,; l < length; l++)
+    for (int c = 0; c < length; c++)
+      if (!board[l][c].open && !board[l][c].bomb)
+        return 1;
+
+  return 0;
 }
 
-//checa vitória
-int checkWin() {
-  int close == 0;
-  int l, c;
-  for (l = 0, l < length, l++ ){
-    for (c = 0, c < length, c++ ){
-      if (board[l][c].open == 0 && board[l][c].bomb == 0){
-        close ++;
-      }
-    }
-  }
-  return close;
-}
-
+// FUNCAO DESNECESSARIA
 //checa derrota
-int checkLost() {
-  int explode == 0;
-  int l, c;
-  for (l = 0, l < length, l++ ){
-    for (c = 0, c < length, c++ ){
-      if (board[l][c].open == 1 && board[l][c].bomb == 1){
-        close ++;
-      }
-    }
-  }
-  return explode;
+int checkLost(void) {
+  for (int l = 0, l < length, l++ ){
+    for (int c = 0, c < length, c++ ){
+      if (board[l][c].open && board[l][c].bomb)
+        return 1;
+
+  return 0;
 }
