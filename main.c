@@ -20,6 +20,7 @@ int timer_inicio(void);
 int timer_fim(void)
 int points(void);
 int *convertpointsitoa(int pontos);
+int convertime(void);
  
 // struct para cada campo
 typedef struct {
@@ -39,7 +40,7 @@ char *playerName = NULL;
 // declaração das variáveis globais de tempo
 int tempo=0;
 time_t t_ini, t_fim;
-
+int hour=0, minute=0, second=0; // usei como global pra não ter que passar três parâmetros e etc 
 
 int main(void) {
   playerInfo();
@@ -167,6 +168,19 @@ int points(void){
   convertpointsitoa(pontos);
 
   return pontos;   
+}
+
+// transforma os segundos em horas, minutos e segundos.
+int convertime(void){
+  int resto; 
+  
+  hour= tempo/3600;
+  resto = tempo % 3600; 
+  
+  minute = resto/60;
+  second = resto%60; 
+
+  return;
 }
 
 // função que converte o valor dos pontos em um vetor alocado dinamicamente
