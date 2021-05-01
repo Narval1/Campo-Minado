@@ -19,6 +19,7 @@ int checkLost(void);
 int timer_inicio(void);
 int timer_fim(void)
 int points(void);
+int *convertpointsitoa(int pontos);
  
 // struct para cada campo
 typedef struct {
@@ -162,6 +163,22 @@ int points(void){
 
   if (tempo!=0)
     pontos=(100000/tempo); // usei o 1000000 pra impedir que a divisão seja menor do que 1 por ser inteiro e o 126 pra dar uma estética legal no valor da pontuação  
+
+  convertpointsitoa(pontos);
+
+  return pontos;   
+}
+
+// função que converte o valor dos pontos em um vetor alocado dinamicamente
+int *convertpointsitoa(int pontos){
+  char *arr=NULL;
+
+  arr= (char*) malloc(50*sizeof(char));
+  itoa(pontos, arr, 10);
+
+  arr=(char *) realloc(arr, strlen(arr)*sizeof(char)); // se eu não fiz cagada no realloc, é isso 
+
+  return(arr);
 }
 
 // abre a coordenada e caso seja zero, abre as adjacentes 
