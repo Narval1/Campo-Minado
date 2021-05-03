@@ -15,9 +15,9 @@ void printBoard(void);
 void play(void);
 void action(int line, int column);
 void openCoord(int line, int column);
-int win(void);
+int checkWin(void);
 void savePlayerInfo(char *points);
-int lose(void);
+int checkLost(void);
 void timerInit(void);
 void timerEnd(void);
 //void convertTime(void);
@@ -33,6 +33,8 @@ typedef struct {
   int flag;           // recebe 0 (false) ou 1 (true)
   int adjacentBombs;  // recebe um numero entre 0 e 8
 } field;
+
+int firstPlay = 1;
 
 // criacao do tabuleiro (matriz[length][length])
 #define length 10
@@ -137,7 +139,7 @@ void printBoard(void) {
         else
           printf(" %d ", board[l][c].adjacentBombs);
       else if (board[l][c].flag)
-        printf(" ! ");
+        printf(" F ");
       else
         printf("   ");
 
@@ -216,7 +218,7 @@ void openCoord(int line, int column) {
 
     if (board[line][column].adjacentBombs == 0) {
       openCoord(line - 1, column);
-      openCoord(line - 1, column - 1);
+      openCoord(line, column - 1);
       openCoord(line - 1, column + 1);
       openCoord(line + 1, column);
       openCoord(line + 1, column - 1);
@@ -232,29 +234,24 @@ void play(void) {
   int line, column;
   char symbol;
 
-  do {
-  printBoard();
+  while (!checkWin() || !checkLost()) {
+    printBoard();
 
-  printf("\nDigite a linha e a coluna: ");
-  scanf("%d %d", &line, &column);
+    printf("\nDigite a linha e a coluna: ");
+    scanf("%d%d", &line, &column);
 
-  if (!validCoord(line, column) || board[line][column].open || board[line][column].flag) {
-    printf("coordenadas invalidas!\n");
-    play();
+    if (!validCoord(line, column)) {
+      printf("coordenadas invalidas!\n");
+      play();
+      return;
+    }
+
+    action(line, column);
   }
-
-  action(line, column);
-  } while (!win() || !lose());
-  
-  if (win())
-    printf("venceu !");
-  else
-    printf("mamou !");
 }
 
 // Checa se o player quer abrir ou marcar com uma bandeira
 void action(int line, int column) {
-  int firstPlay = 1;
   char symbol;
 
   printf("\nO que dejesa fazer? ('O' para abrir e 'F' para colocar bandeira): ");
@@ -262,8 +259,14 @@ void action(int line, int column) {
   symbol = toupper(symbol);
 
   if (symbol == 'F') {
-    board[line][column].flag = 1;
-    return;
+    if (board[line][column].flag == 1) {
+      board[line][column].flag = 0;
+      return;
+    }
+    else {
+      board[line][column].flag = 1;
+      return;
+    }
   }
 
   if (symbol == 'O') {
