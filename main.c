@@ -19,12 +19,10 @@ void openCoord(int line, int column);
 int checkWin(void);
 int checkLost(void);
 void savePlayerInfo(char *points);
+char * points(void);
 void timerInit(void);
 void timerEnd(void);
 void convertTime(void);
-char * points(void);
-char * convertPointsItoa(int pontos);
-char * itoa(int val, int base);
 void explosion(void);
 
 // struct para cada campo
@@ -193,6 +191,8 @@ void play(void) {
   int line, column;
   char symbol;
 
+  timerInit();
+
   do {
     printBoard();
 
@@ -207,6 +207,9 @@ void play(void) {
 
     action(line, column);
   } while (!checkWin() && !checkLost());
+
+  timerEnd();
+  convertTime();
 
   if (checkWin()) {
     printBoard();
@@ -230,7 +233,7 @@ void action(int line, int column) {
   symbol = toupper(symbol);
 
   if (symbol == 'F') {
-    if (board[line][column].flag == 1) {
+    if (board[line][column].flag) {
       board[line][column].flag = 0;
       return;
     }
@@ -323,6 +326,21 @@ void savePlayerInfo(char *points) {
   free(playerName);
 }
 
+// calcula a pontuacao do usuario caso ele venca e converte para string
+char * points(void) {
+  int points;
+  char *playerPoints = (char *) malloc(101*sizeof(char));
+
+  if (tempo != 0)
+    points = (100000 / tempo);
+
+  sprintf(playerPoints, "%d", points);
+
+  playerPoints = (char *) realloc(playerPoints, strlen(playerPoints) * sizeof(char));
+
+  return playerPoints;
+}
+
 // funcao que inicia o registro do tempo.
 void timerInit(void){
   tempo = 0;
@@ -335,45 +353,11 @@ void timerEnd(void) {
   tempo = difftime(t_fim, t_ini);
 }
 
-// calcula a pontuacao do usuario caso ele venca 
-char * points(void){
-  int points;
-
-  if (tempo != 0)
-    points = (100000 / tempo);
-
-  return itoa(points, 10);
-}
-
 // transforma os segundos em horas, minutos e segundos.
-void convertTime(void){
-  hour= tempo / 3600;
+void convertTime(void) {
+  hour = tempo / 3600;
   minute = (tempo % 3600) / 60;
   second = (tempo % 3600) % 60;
-}
-
-// funcao que converte o valor dos pontos em um vetor alocado dinamicamente
-char * convertPointsItoa(int points){
-  char *playerPoints = (char *) malloc(101*sizeof(char));
-
-  //itoa(points, playerPoints, 10);
-
-  playerPoints = (char *) realloc(playerPoints, strlen(playerPoints) * sizeof(char));
-
-  return playerPoints;
-}
-
-// funcao para converter int para char
-char* itoa(int val, int base){
-	static char buf[32] = {0};
-	
-	int i = 30;
-	
-	for(; val && i ; --i, val /= base)
-	
-		buf[i] = "0123456789abcdef"[val % base];
-	
-	return &buf[i+1];
 }
 
 void explosion(void) {
