@@ -1,4 +1,4 @@
-  // bibliotecas
+// bibliotecas
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,22 +8,24 @@
 // prototipos de funcoes
 void playerInfo(void);
 void boardInit(void);
-void printBoard(void);
-void savePlayerInfo(char *points);
-int validCoord(int line, int column);
-void openCoord(int line, int column);
-void play(void);
-void action(int line, int column);
 void putBombs(int line, int column);
 int preBombs(int line, int column);
+void countBombs(void);
+void printBoard(void);
+void play(void);
+void action(int line, int column);
+void openCoord(int line, int column);
 int checkWin(void);
-int checkLost(void);
-int timerInicio(void);
-int timerFim(void)
-int points(void);
-int * convertPointsItoa(int pontos);
-int convertTime(void);
- 
+void savePlayerInfo(char *points);
+//int checkLost(void);
+void timerInit(void);
+void timerEnd(void);
+//void convertTime(void);
+char * points(void);
+char * convertPointsItoa(int pontos);
+int validCoord(int line, int column);
+char* itoa(int val, int base);
+
 // struct para cada campo
 typedef struct {
   int bomb;           // recebe 0 (false) ou 1 (true)
@@ -38,16 +40,18 @@ field board[length][length];
 
 char *playerName = NULL;
 
-
-// declaração das variáveis globais de tempo
-int tempo=0;
+// declaracao das variaveis globais de tempo
 time_t t_ini, t_fim;
-int hour=0, minute=0, second=0; // usei como global pra não ter que passar três parâmetros e etc 
+int tempo, hour = 0, minute = 0, second = 0;
 
 int main(void) {
   playerInfo();
 
-  savePlayerInfo("points");   // ultima funcao a ser chamada
+  boardInit();
+
+  play();
+
+  savePlayerInfo(points());
 
   return 0;
 }
@@ -60,7 +64,7 @@ void playerInfo(void) {
     exit(2);
   }
 
-  printf("Digite o nome do jogador:\nEx.: nome_sobrenome\n\n");
+  printf("Digite o nome do jogador:\nEx.: nome_sobrenome\n");
   scanf("%s", playerName);
 
   playerName = (char *) realloc(playerName, strlen(playerName) * sizeof(char));
@@ -150,56 +154,57 @@ int validCoord(int line, int column) {
   return 0;
 }
 
-// função que inicia o registro do tempo.
-int timerInicio(void){
-  tempo=0;
-  t_ini= time(NULL);
+// funcao que inicia o registro do tempo.
+void timerInit(void){
+  tempo = 0;
+  t_ini = time(NULL);
 }
 
-//função que finaliza o registro do tempo caso o usuário vença.
-int timerFim(void){   // Chamar essa função quando o usuário ganhar.
-  if(checkwin(void)==1){
-    t_fim= time(NULL);
-    tempo= difftime(t_fim,t_ini);
-    points();
-  }
+//funcao que finaliza o registro do tempo.
+void timerEnd(void) {
+  t_fim = time(NULL);
+  tempo = difftime(t_fim, t_ini);
 }
 
-// calcula a pontuação do usuário caso ele vença 
-int points(void){
-   int pontos=0;
+// calcula a pontuacao do usuario caso ele venca 
+char * points(void){
+  int points;
 
-  if (tempo!=0)
-    pontos=(100000/tempo); // usei o 1000000 pra impedir que a divisão seja menor do que 1 por ser inteiro e o 126 pra dar uma estética legal no valor da pontuação  
+  if (tempo != 0)
+    points = (100000 / tempo);
 
-  convertpointsitoa(pontos);
-
-  return pontos;   
+  return itoa(points, 10);
 }
 
 // transforma os segundos em horas, minutos e segundos.
-int convertTime(void){
-  int resto; 
-  
-  hour= tempo/3600;
-  resto = tempo % 3600; 
-  
-  minute = resto/60;
-  second = resto%60; 
-
-  return;
+void convertTime(void){
+  hour= tempo / 3600;
+  minute = (tempo % 3600) / 60;
+  second = (tempo % 3600) % 60;
 }
 
-// função que converte o valor dos pontos em um vetor alocado dinamicamente
-int * convertPointsItoa(int pontos){
-  char *arr=NULL;
+// funcao que converte o valor dos pontos em um vetor alocado dinamicamente
+char * convertPointsItoa(int points){
+  char *playerPoints = (char *) malloc(101*sizeof(char));
 
-  arr= (char*) malloc(50*sizeof(char));
-  itoa(pontos, arr, 10);
+  //itoa(points, playerPoints, 10);
 
-  arr=(char *) realloc(arr, strlen(arr)*sizeof(char)); // se eu não fiz cagada no realloc, é isso 
+  playerPoints = (char *) realloc(playerPoints, strlen(playerPoints) * sizeof(char));
 
-  return(arr);
+  return playerPoints;
+}
+
+// funcao para converter int para char
+char* itoa(int val, int base){
+	static char buf[32] = {0};
+	
+	int i = 30;
+	
+	for(; val && i ; --i, val /= base)
+	
+		buf[i] = "0123456789abcdef"[val % base];
+	
+	return &buf[i+1];
 }
 
 // abre a coordenada e caso seja zero, abre as adjacentes 
@@ -225,9 +230,11 @@ void play(void) {
   int line, column;
   char symbol;
 
+  do {
+  printBoard();
+
   printf("\nDigite a linha e a coluna: ");
   scanf("%d%d", &line, &column);
-  timerInicio();
 
   if (!validCoord(line, column)) {
     printf("coordenadas invalidas!\n");
@@ -236,15 +243,15 @@ void play(void) {
   }
 
   action(line, column);
+  } while (!checkWin() || (board[line][column].bomb && !board[line][column].flag));
 }
 
 // Checa se o player quer abrir ou marcar com uma bandeira
 void action(int line, int column) {
-  int i;
   int firstPlay = 1;
   char symbol;
 
-  printf("\nO que dejesa fazer? ('O' para abrir e 'F' para colocar bandeira):");
+  printf("\nO que dejesa fazer? ('O' para abrir e 'F' para colocar bandeira): ");
   scanf(" %c",&symbol);
   symbol = toupper(symbol);
 
@@ -256,6 +263,7 @@ void action(int line, int column) {
   if (symbol == 'O') {
     if (firstPlay) {
       putBombs(line, column);
+      countBombs();
       firstPlay = 0;
     }
 
@@ -305,6 +313,28 @@ int preBombs(int line, int column) {
 
   board[l][c].bomb = 1;
   return 0;
+}
+
+void countBombs(void) {
+  for (int line = 0; line < length; line++)
+    for (int column = 0; column < length; column++) {
+    if (board[line - 1][column].bomb)
+      board[line][column].adjacentBombs++;
+    if (board[line - 1][column + 1].bomb)
+      board[line][column].adjacentBombs++;
+    if (board[line - 1][column - 1].bomb)
+      board[line][column].adjacentBombs++;
+    if (board[line][column + 1].bomb)
+      board[line][column].adjacentBombs++;
+    if (board[line][column - 1].bomb)
+      board[line][column].adjacentBombs++;
+    if (board[line + 1][column].bomb)
+      board[line][column].adjacentBombs++;
+    if (board[line + 1][column + 1].bomb)
+      board[line][column].adjacentBombs++;
+    if (board[line + 1][column - 1].bomb)
+      board[line][column].adjacentBombs++;
+    }
 }
 
 //checa vitoria
