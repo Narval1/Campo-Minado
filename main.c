@@ -15,9 +15,9 @@ void printBoard(void);
 void play(void);
 void action(int line, int column);
 void openCoord(int line, int column);
-int checkWin(void);
+int win(void);
 void savePlayerInfo(char *points);
-int checkLost(void);
+int lose(void);
 void timerInit(void);
 void timerEnd(void);
 //void convertTime(void);
@@ -234,11 +234,11 @@ void play(void) {
   int line, column;
   char symbol;
 
-  while (!checkWin() || !checkLost()) {
+  while (!win() || !lose()) {
     printBoard();
 
     printf("\nDigite a linha e a coluna: ");
-    scanf("%d%d", &line, &column);
+    scanf("%d %d", &line, &column);
 
     if (!validCoord(line, column)) {
       printf("coordenadas invalidas!\n");
@@ -248,6 +248,8 @@ void play(void) {
 
     action(line, column);
   }
+
+  printf("....\n");
 }
 
 // Checa se o player quer abrir ou marcar com uma bandeira
