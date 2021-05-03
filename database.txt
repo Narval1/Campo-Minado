@@ -1,18 +1,28 @@
 
-Jogador: vini; Pontos: 
+Jogador: vini; Pontos: ----
 
-Jogador: vini; Pontos: 
+Jogador: v; Pontos: ----
 
-Jogador: vini; Pontos: 1743835300
+Jogador: vin; Pontos: ----
 
-Jogador: vini; Pontos: 195046571
+Jogador: v; Pontos: ----
 
-Jogador: vini; Pontos: 1049980583
+Jogador: vini; Pontos: ----
 
-Jogador: v; Pontos: 1132846215
+Jogador: v; Pontos: ----
 
-Jogador: vini; Pontos: 1519632105
+Jogador: v; Pontos: ----
 
-Jogador: v; Pontos: 
+Jogador: v; Pontos: ----
 
-Jogador: v; Pontos: 235603419
+Jogador: vin; Pontos: ----
+
+Jogador: v; Pontos: 32765
+
+Jogador: vini; Pontos: 32766
+
+Jogador: vini; Pontos: ----
+
+Jogador: v; Pontos: ----
+
+Jogador: v; Pontos: ----
