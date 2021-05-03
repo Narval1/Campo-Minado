@@ -15,9 +15,9 @@ void printBoard(void);
 void play(void);
 void action(int line, int column);
 void openCoord(int line, int column);
-int checkWin(void);
+int win(void);
 void savePlayerInfo(char *points);
-//int checkLost(void);
+int lose(void);
 void timerInit(void);
 void timerEnd(void);
 //void convertTime(void);
@@ -45,6 +45,8 @@ time_t t_ini, t_fim;
 int tempo, hour = 0, minute = 0, second = 0;
 
 int main(void) {
+  srand(time(NULL));
+
   playerInfo();
 
   boardInit();
@@ -135,7 +137,7 @@ void printBoard(void) {
         else
           printf(" %d ", board[l][c].adjacentBombs);
       else if (board[l][c].flag)
-        printf(" |> ");
+        printf(" ! ");
       else
         printf("   ");
 
@@ -148,7 +150,7 @@ void printBoard(void) {
 
 // verificacao da coordenada no campo.
 int validCoord(int line, int column) {
-  if(line >= 0 && line < length && column >= 0 && column < length )
+  if (line >= 0 && line < length && column >= 0 && column < length)
     return 1;
 
   return 0;
@@ -220,7 +222,7 @@ void openCoord(int line, int column) {
       openCoord(line + 1, column - 1);
       openCoord(line + 1, column + 1);
       openCoord(line, column + 1);
-      openCoord(line - 1, column - 1);
+      openCoord(line, column - 1);
     }
   }
 }
@@ -234,16 +236,20 @@ void play(void) {
   printBoard();
 
   printf("\nDigite a linha e a coluna: ");
-  scanf("%d%d", &line, &column);
+  scanf("%d %d", &line, &column);
 
-  if (!validCoord(line, column)) {
+  if (!validCoord(line, column) || board[line][column].open || board[line][column].flag) {
     printf("coordenadas invalidas!\n");
     play();
-    return;
   }
 
   action(line, column);
-  } while (!checkWin() || (board[line][column].bomb && !board[line][column].flag));
+  } while (!win() || !lose());
+  
+  if (win())
+    printf("venceu !");
+  else
+    printf("mamou !");
 }
 
 // Checa se o player quer abrir ou marcar com uma bandeira
@@ -252,7 +258,7 @@ void action(int line, int column) {
   char symbol;
 
   printf("\nO que dejesa fazer? ('O' para abrir e 'F' para colocar bandeira): ");
-  scanf(" %c",&symbol);
+  scanf(" %c", &symbol);
   symbol = toupper(symbol);
 
   if (symbol == 'F') {
@@ -277,16 +283,15 @@ void action(int line, int column) {
 
 // Coloca bombas em locais aleatorios, porem longe do primeiro clique
 void putBombs(int line, int column) {
-  int numberOfBombs = (length * length) * 0.25;
+  int numberOfBombs = (length * length) * 0.2;
 
-  for (int bombs = 0; bombs <= numberOfBombs; bombs++)
+  for (int bombs = 0; bombs < numberOfBombs; bombs++)
     if (preBombs(line, column))
       bombs--;
 }
 
 // Checagem para por bombas longe de onde foi dado o primeiro clique
 int preBombs(int line, int column) {
-  srand(time(NULL));
   int l = rand() % length, c = rand() % length;
 
   if (l == line && c == column)
@@ -318,43 +323,42 @@ int preBombs(int line, int column) {
 void countBombs(void) {
   for (int line = 0; line < length; line++)
     for (int column = 0; column < length; column++) {
-    if (board[line - 1][column].bomb)
+    if (board[line - 1][column].bomb && validCoord(line - 1, column))
       board[line][column].adjacentBombs++;
-    if (board[line - 1][column + 1].bomb)
+    if (board[line - 1][column + 1].bomb && validCoord(line - 1, column + 1))
       board[line][column].adjacentBombs++;
-    if (board[line - 1][column - 1].bomb)
+    if (board[line - 1][column - 1].bomb && validCoord(line - 1, column - 1))
       board[line][column].adjacentBombs++;
-    if (board[line][column + 1].bomb)
+    if (board[line][column + 1].bomb && validCoord(line, column + 1))
       board[line][column].adjacentBombs++;
-    if (board[line][column - 1].bomb)
+    if (board[line][column - 1].bomb && validCoord(line, column - 1))
       board[line][column].adjacentBombs++;
-    if (board[line + 1][column].bomb)
+    if (board[line + 1][column].bomb && validCoord(line + 1, column))
       board[line][column].adjacentBombs++;
-    if (board[line + 1][column + 1].bomb)
+    if (board[line + 1][column + 1].bomb && validCoord(line + 1, column + 1))
       board[line][column].adjacentBombs++;
-    if (board[line + 1][column - 1].bomb)
+    if (board[line + 1][column - 1].bomb && validCoord(line + 1, column - 1))
       board[line][column].adjacentBombs++;
     }
 }
 
 //checa vitoria
-int checkWin(void) {
+int win(void) {
   for (int l = 0; l < length; l++)
     for (int c = 0; c < length; c++)
       if (!board[l][c].open && !board[l][c].bomb)
-        return 1;
+        return 0;
 
-  return 0;
+  return 1;
 }
 
 // FUNCAO DESNECESSARIA
 //checa derrota
-int checkLost(void) {
-  for (int l = 0; l < length; l++ ){
-    for (int c = 0; c < length; c++ ){
+int lose(void) {
+  for (int l = 0; l < length; l++)
+    for (int c = 0; c < length; c++)
       if (board[l][c].open && board[l][c].bomb)
         return 1;
-    }
-  }
+
   return 0;
 }
