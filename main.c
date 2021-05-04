@@ -220,13 +220,12 @@ void play(void) {
 
   if (checkWin()) {
     printBoard();
-    printf("venceu amigo! agora va votar no fiuk\n");
+    printf("Venceu, amigo!\n");
     return;
   }
 
   printBoard();
   explosion();
-  printf("\tmamou e gostou!\n");
 }
 
 // Checa se o player quer abrir ou marcar com uma bandeira
@@ -443,19 +442,19 @@ void convertTime(void) {
 }
 
 void explosion(void) {
-  printf("             . . .\n");
-  printf("            /|/\n");
-  printf("          `--+--'\n");
-  printf("            /|\n");
-  printf("           ' | '\n");
-  printf("             |\n");
-  printf("             |\n");
-  printf("         ,--'#`--.\n");
-  printf("         |#######|\n");
-  printf("      _.-'#######`-._\n");
-  printf("   ,-'###############`-.\n");
-  printf(" ,'#####################`,\n");
-  printf(" /#########################\n");
+  printf("               . . .\n");
+  printf("              /|/\n");
+  printf("            `--+--'\n");
+  printf("              /|\n");
+  printf("             ' | '\n");
+  printf("               |\n");
+  printf("               |\n");
+  printf("           ,--'#`--.\n");
+  printf("           |#######|\n");
+  printf("        _.-'#######`-._\n");
+  printf("     ,-'###############`-.\n");
+  printf("   ,'#####################`,\n");
+  printf("  /#########################\\\n");
   printf(" |##########################|\n");
   printf("|############################|\n");
   printf("|####### VOCE PERDEU ########|\n");
@@ -463,7 +462,7 @@ void explosion(void) {
   printf("|############################|\n");
   printf(" |#########################|\n");
   printf("  |#######################|\n");
-  printf("  .#####################,'\n");
-  printf("   `._###############_,'\n");
-  printf("      `--..#####..--'\n");
+  printf("   .#####################,'\n");
+  printf("    `._###############_,'\n");
+  printf("       `--..#####..--'\n");
 }
