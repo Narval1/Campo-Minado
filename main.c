@@ -18,8 +18,9 @@ void action(int line, int column);
 void openCoord(int line, int column);
 int checkWin(void);
 int checkLost(void);
-void savePlayerInfo(char *points);
 char * points(void);
+void savePlayerInfo(char *points);
+void gameHistory(void);
 void timerInit(void);
 void timerEnd(void);
 void convertTime(void);
@@ -54,6 +55,8 @@ int main(void) {
   boardInit();
 
   play();
+
+  gameHistory();
 
   return 0;
 }
@@ -295,6 +298,31 @@ int checkLost(void) {
   return 0;
 }
 
+// calcula a pontuacao do usuario caso ele venca e converte para string
+char * points(void) {
+  int points;
+  char *playerPoints = (char *) malloc(101*sizeof(char));
+
+  if (playerPoints == NULL) {
+    printf("Erro ao alocar memoria.");
+    exit(2);
+  }
+
+  if (tempo != 0)
+    points = (100000 / tempo);
+
+  sprintf(playerPoints, "%d", points);
+
+  playerPoints = (char *) realloc(playerPoints, strlen(playerPoints) * sizeof(char));
+
+  if (playerPoints == NULL) {
+    printf("Erro ao alocar memoria.");
+    exit(2);
+  }
+
+  return playerPoints;
+}
+
 // salva as informacoes no arquivo database.txt
 void savePlayerInfo(char *points) {
   FILE *database = fopen("database.txt", "a");
@@ -326,28 +354,32 @@ void savePlayerInfo(char *points) {
   free(playerName);
 }
 
-// calcula a pontuacao do usuario caso ele venca e converte para string
-char * points(void) {
-  int points;
-  char *playerPoints = (char *) malloc(101*sizeof(char));
+void gameHistory(void) {
+  FILE *database = fopen("database.txt", "r");
+  char c;
 
-  if (tempo != 0)
-    points = (100000 / tempo);
+  if (database == NULL) {
+    printf("Erro ao abrir o arquivo!");
+    return;
+  }
 
-  sprintf(playerPoints, "%d", points);
+  printf("\nHistorico de partidas:\n");
 
-  playerPoints = (char *) realloc(playerPoints, strlen(playerPoints) * sizeof(char));
+  while ((c = fgetc(database)) != EOF)
+    printf("%c", c);
 
-  return playerPoints;
+  printf("\n");
+
+  fclose(database);
 }
 
 // funcao que inicia o registro do tempo.
-void timerInit(void){
+void timerInit(void) {
   tempo = 0;
   t_ini = time(NULL);
 }
 
-//funcao que finaliza o registro do tempo.
+// funcao que finaliza o registro do tempo.
 void timerEnd(void) {
   t_fim = time(NULL);
   tempo = difftime(t_fim, t_ini);
