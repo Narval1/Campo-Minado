@@ -18,8 +18,8 @@ void action(int line, int column);
 void openCoord(int line, int column);
 int checkWin(void);
 int checkLost(void);
-char * points(void);
-void savePlayerInfo(char *points);
+char * remainingFields(void);
+void savePlayerInfo(char *remainingFields);
 void gameHistory(void);
 void timerInit(void);
 void timerEnd(void);
@@ -44,6 +44,7 @@ char *playerName = NULL;
 // declaracao das variaveis globais de tempo
 time_t t_ini, t_fim;
 int tempo, hour = 0, minute = 0, second = 0;
+char timer[9];
 
 int firstPlay = 1;
 
@@ -55,6 +56,8 @@ int main(void) {
   boardInit();
 
   play();
+
+  savePlayerInfo(remainingFields());
 
   gameHistory();
 
@@ -137,6 +140,7 @@ int preBombs(int line, int column) {
   return 0;
 }
 
+// conta bombas proximas a uma posicao
 void countBombs(void) {
   for (int line = 0; line < length; line++)
     for (int column = 0; column < length; column++) {
@@ -217,14 +221,12 @@ void play(void) {
   if (checkWin()) {
     printBoard();
     printf("venceu amigo! agora va votar no fiuk\n");
-    savePlayerInfo(points());
     return;
   }
 
   printBoard();
   explosion();
   printf("\tmamou e gostou!\n");
-  savePlayerInfo("----");
 }
 
 // Checa se o player quer abrir ou marcar com uma bandeira
@@ -278,7 +280,7 @@ void openCoord(int line, int column) {
   }
 }
 
-//checa vitoria
+// checa vitoria
 int checkWin(void) {
   for (int l = 0; l < length; l++)
     for (int c = 0; c < length; c++)
@@ -288,7 +290,7 @@ int checkWin(void) {
   return 1;
 }
 
-//checa derrota
+// checa derrota
 int checkLost(void) {
   for (int l = 0; l < length; l++)
     for (int c = 0; c < length; c++)
@@ -299,34 +301,31 @@ int checkLost(void) {
 }
 
 // calcula a pontuacao do usuario caso ele venca e converte para string
-char * points(void) {
-  int points;
-  char *playerPoints = (char *) malloc(101*sizeof(char));
+char * remainingFields(void) {
+  int rFields = 0;
+  char *remainingFields = (char *) malloc(3 * sizeof(char));
 
-  if (playerPoints == NULL) {
+  if (remainingFields == NULL) {
     printf("Erro ao alocar memoria.");
     exit(2);
   }
 
-  if (tempo != 0)
-    points = (100000 / tempo);
+  for (int l = 0; l < length; l++)
+    for (int c = 0; c < length; c++)
+      if (!board[l][c].open && !board[l][c].bomb)
+        rFields++;
 
-  sprintf(playerPoints, "%d", points);
+  sprintf(remainingFields, "%d", rFields);
 
-  playerPoints = (char *) realloc(playerPoints, strlen(playerPoints) * sizeof(char));
-
-  if (playerPoints == NULL) {
-    printf("Erro ao alocar memoria.");
-    exit(2);
-  }
-
-  return playerPoints;
+  return remainingFields;
 }
 
 // salva as informacoes no arquivo database.txt
-void savePlayerInfo(char *points) {
+void savePlayerInfo(char *remainingFields) {
   FILE *database = fopen("database.txt", "a");
-  char text1[10] = "Jogador: ", text2[11] = "; Pontos: ";
+  char text1[10] = "Jogador: ";
+  char text2[10] = "; Tempo: ";
+  char text3[21] = "; Campos restantes: ";
 
   if (!database) {
     printf("Erro ao abrir o arquivo!");
@@ -344,8 +343,14 @@ void savePlayerInfo(char *points) {
   for (int index = 0; index < strlen(text2); index++)
     fputc(text2[index], database);
 
-  for (int index = 0; index < strlen(points); index++)
-    fputc(points[index], database);
+  for (int index = 0; index < strlen(timer); index++)
+    fputc(timer[index], database);
+
+  for (int index = 0; index < strlen(text3); index++)
+    fputc(text3[index], database);
+
+  for (int index = 0; index < strlen(remainingFields); index++)
+    fputc(remainingFields[index], database);
 
   fputc('\n', database);
 
@@ -390,6 +395,51 @@ void convertTime(void) {
   hour = tempo / 3600;
   minute = (tempo % 3600) / 60;
   second = (tempo % 3600) % 60;
+
+  char strHour[3], strMinute[3], strSecond[3];
+
+  int resSprintf = sprintf(strHour, "%d", hour);
+  
+  if (resSprintf == 0) {
+    timer[0] = '0';
+    timer[1] = '0';
+  } else if (resSprintf == 1) {
+    timer[0] = '0';
+    timer[1] = strHour[0];
+  } else {
+    timer[0] = strHour[0];
+    timer[1] = strHour[1];
+  }
+
+  timer[2] = ':';
+
+  resSprintf = sprintf(strMinute, "%d", minute);
+
+  if (resSprintf == 0) {
+    timer[3] = '0';
+    timer[4] = '0';
+  } else if (resSprintf == 1) {
+    timer[3] = '0';
+    timer[4] = strMinute[0];
+  } else {
+    timer[3] = strMinute[0];
+    timer[4] = strMinute[1];
+  }
+
+  timer[5] = ':';
+
+  resSprintf = sprintf(strSecond, "%d", second);
+
+  if (resSprintf == 0) {
+    timer[6] = '0';
+    timer[7] = '0';
+  } else if (resSprintf == 1) {
+    timer[6] = '0';
+    timer[7] = strSecond[0];
+  } else {
+    timer[6] = strSecond[0];
+    timer[7] = strSecond[1];
+  }
 }
 
 void explosion(void) {
@@ -408,7 +458,7 @@ void explosion(void) {
   printf(" /#########################\n");
   printf(" |##########################|\n");
   printf("|############################|\n");
-  printf("|########VOCE PERDEU#########|\n");
+  printf("|####### VOCE PERDEU ########|\n");
   printf("|############################|\n");
   printf("|############################|\n");
   printf(" |#########################|\n");
