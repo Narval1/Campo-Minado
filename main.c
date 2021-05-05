@@ -326,7 +326,7 @@ void savePlayerInfo(char *remainingFields) {
   char text2[10] = "; Tempo: ";
   char text3[21] = "; Campos restantes: ";
 
-  if (!database) {
+  if (database == NULL) {
     printf("Erro ao abrir o arquivo!");
     return;
   }
@@ -358,6 +358,7 @@ void savePlayerInfo(char *remainingFields) {
   free(playerName);
 }
 
+// exibe o historico de partidas salvas no arquivo database.txt
 void gameHistory(void) {
   FILE *database = fopen("database.txt", "r");
   char c;
