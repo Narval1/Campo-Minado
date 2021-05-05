@@ -55,6 +55,8 @@ int main(void) {
 
   boardInit();
 
+  timerInit();
+
   play();
 
   savePlayerInfo(remainingFields());
@@ -198,19 +200,16 @@ void play(void) {
   int line, column;
   char symbol;
 
-  timerInit();
-
   do {
     printBoard();
 
-    printf("\nDigite a linha e a coluna: ");
-    scanf("%d %d", &line, &column);
+    do {
+      printf("\nDigite a linha e a coluna: ");
+      scanf("%d %d", &line, &column);
 
-    if (!validCoord(line, column) || board[line][column].open) {
-      printf("coordenadas invalidas!\n");
-      play();
-      return;
-    }
+      if (!validCoord(line, column)) 
+        printf("\nCoordenadas invalidas!\n");
+    } while (!validCoord(line, column));
 
     action(line, column);
   } while (!checkWin() && !checkLost());
@@ -236,7 +235,7 @@ void action(int line, int column) {
   scanf(" %c",&symbol);
   symbol = toupper(symbol);
 
-  if (symbol == 'F') {
+  if (symbol == 'F' && !board[line][column].open) {
     if (board[line][column].flag) {
       board[line][column].flag = 0;
       return;
@@ -246,7 +245,7 @@ void action(int line, int column) {
     return;
   }
 
-  if (symbol == 'O' && !board[line][column].flag) {
+  if (symbol == 'O' && !board[line][column].flag && !board[line][column].open) {
     if (firstPlay) {
       putBombs(line, column);
       countBombs();
@@ -257,8 +256,8 @@ void action(int line, int column) {
     return;
   }
 
-  printf("coordenadas invalidas!\n");
-  action(line, column);
+  printf("\nAcao invalida!\n");
+  play();
 }
 
 // abre a coordenada e caso seja zero, abre as adjacentes 
